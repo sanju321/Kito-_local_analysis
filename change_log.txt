@@ -1,0 +1,13 @@
+Change Log Kito+_analysis_script:
+
+
+
+-Pcba,Charger Download and analysis added(v1.0)
+-layout of pcba and system changed(v1.1)
+-pcba analysis modified for fail devices check added for "fail"(v1.2)
+-included reverse.csv in Download(v1.3)
+-changed Download-including only unique entrues in csv(v1.3)
+-changed Download % to Total Downloaded Data(v1.3)
+-Included fail cycle in Pcba and System for Failed devices separetely(v1.3)
+
+
