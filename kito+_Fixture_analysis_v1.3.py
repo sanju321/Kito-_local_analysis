@@ -637,6 +637,10 @@ class Pcba_win(wx.Panel):
         wx.StaticText(self, -1, 'white_led : ', (130, 510))
         self.white_led_fail_cycle = wx.StaticText(self, -1, '', (400, 510))
 
+        self.fail_sn_button =wx.Button(self, label="Fail", pos=(20, 240), size=(50, -1))
+        self.fail_sn_button.Enable(False)
+        self.Bind(wx.EVT_BUTTON, self.fail_sn_btn_click,self.fail_sn_button)
+
         self.AnalysisSizer.Add(self.total_unique_device_tested, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.total_pass, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.fail_devices, 0, wx.ALL | wx.CENTER, 2)
@@ -681,7 +685,30 @@ class Pcba_win(wx.Panel):
 
         out.close()'''
 
+    def fail_sn_btn_click(self,e):
+        '''display only fail device serial number in sheet.
+        global variable-- logpath_3
+        '''
+
+        if len(self.fail_devices_serial_number)>0:
+            self.logpath=self.fpath.split('.')[0]+"_Fail_Serial_Numbers"+".csv"#displays fail device serial numbers
+            f=open(self.logpath, 'wb')
+            rr=csv.writer(f)
+            rr.writerow(['SN'])
+            for i in range(len(self.fail_devices_serial_number)):
+                print type(self.fail_devices_serial_number[i])
+                rr.writerow([self.fail_devices_serial_number[i]])
+            f.close()
+            dlg = wx.MessageDialog(self, "Fail serial number file created.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+        else:
+            dlg = wx.MessageDialog(self, "No unit Failed.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+
     def analyze_btn_click(self, event):
+        self.fail_sn_button.Enable(True)
 
         start_date = self.start_date_combo_box.GetValue()
         end_date = self.end_date_combo_box.GetValue()
@@ -1048,7 +1075,7 @@ class Pcba_win(wx.Panel):
         self.failed_charging_test_fail_count = 0
         self.failed_sg_test_fail_count = 0
         self.failed_sd_test_fail_count = 0
-
+        self.fail_devices_serial_number=[]
         self.first_pass_counter = 0
         for i in range(len(self.all_dev_dict['overall_res'])):
             if self.all_dev_dict['tested_count'][i] == 1 and self.all_dev_dict['overall_res'][i] == 'Pass':
@@ -1057,6 +1084,7 @@ class Pcba_win(wx.Panel):
                     self.all_dev_dict['overall_res'][i] == 'Fail' or self.all_dev_dict['overall_res'][i] == 'fail'):
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
                 if self.all_dev_dict['blue_led_fail'][i] == 'fail':
                     self.failed_blue_led_fail_count += 1
                 if self.all_dev_dict['blink_led_fail'][i] == 'fail':
@@ -1077,6 +1105,7 @@ class Pcba_win(wx.Panel):
                     self.all_dev_dict['overall_res'][i] == 'Fail' or self.all_dev_dict['overall_res'][i] == 'fail'):
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
                 if self.all_dev_dict['blue_led_fail'][i] == 'fail':
                     self.failed_blue_led_fail_count += 1
                 if self.all_dev_dict['blink_led_fail'][i] == 'fail':
@@ -1096,6 +1125,7 @@ class Pcba_win(wx.Panel):
                     self.all_dev_dict['overall_res'][i] == 'Fail' or self.all_dev_dict['overall_res'][i] == 'fail'):
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
                 if self.all_dev_dict['blue_led_fail'][i] == 'fail':
                     self.failed_blue_led_fail_count += 1
                 if self.all_dev_dict['blink_led_fail'][i] == 'fail':
@@ -1115,6 +1145,7 @@ class Pcba_win(wx.Panel):
                     self.all_dev_dict['overall_res'][i] == 'Fail' or self.all_dev_dict['overall_res'][i] == 'fail'):
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
                 if self.all_dev_dict['blue_led_fail'][i] == 'fail':
                     self.failed_blue_led_fail_count += 1
                 if self.all_dev_dict['blink_led_fail'][i] == 'fail':
@@ -1134,6 +1165,7 @@ class Pcba_win(wx.Panel):
                     self.all_dev_dict['overall_res'][i] == 'Fail' or self.all_dev_dict['overall_res'][i] == 'fail'):
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
                 if self.all_dev_dict['blue_led_fail'][i] == 'fail':
                     self.failed_blue_led_fail_count += 1
                 if self.all_dev_dict['blink_led_fail'][i] == 'fail':
@@ -1149,7 +1181,7 @@ class Pcba_win(wx.Panel):
 
 
         # print f_cnt
-
+        print self.fail_devices_serial_number,len(self.fail_devices_serial_number)
         self.fail_devices_counter = f_cnt
 
         self.blue_led_fail_cycle.SetLabel(str(self.blue_led_fail_cycle_counter))
@@ -1360,15 +1392,39 @@ class Sync_win(wx.Panel):
         wx.StaticText(self, -1, 'Retested Devices : ', (100, 270))
         self.retest_devices = wx.StaticText(self, -1, '', (400, 270))
 
+        self.fail_sn_button =wx.Button(self, label="Fail", pos=(20, 240), size=(50, -1))
+        self.fail_sn_button.Enable(False)
+        self.Bind(wx.EVT_BUTTON, self.fail_sn_btn_click,self.fail_sn_button)
+
         self.AnalysisSizer.Add(self.total_unique_device_tested, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.total_pass, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.fail_devices, 0, wx.ALL | wx.CENTER, 2)
 
         self.Total_Analysis_Sizer.Add(self.AnalysisSizer, 0, wx.ALL | wx.CENTER, 5)
 
+    def fail_sn_btn_click(self,e):
+        '''display only fail device serial number in sheet.
+        global variable-- logpath_3
+        '''
+        if len(self.fail_devices_serial_number)>0:
+            self.logpath=self.fpath.split('.')[0]+"_Fail_Serial_Numbers"+".csv"#displays fail device serial numbers
+            f=open(self.logpath, 'wb')
+            rr=csv.writer(f)
+            rr.writerow(['SN'])
+            for i in range(len(self.fail_devices_serial_number)):
+                print type(self.fail_devices_serial_number[i])
+                rr.writerow([self.fail_devices_serial_number[i]])
+            f.close()
+            dlg = wx.MessageDialog(self, "Fail serial number file created.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+        else:
+            dlg = wx.MessageDialog(self, "No unit Failed.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
 
     def analyze_btn_click(self, event):
-
+        self.fail_sn_button.Enable(True)
         start_date = self.start_date_combo_box.GetValue()
         end_date = self.end_date_combo_box.GetValue()
 
@@ -1503,6 +1559,7 @@ class Sync_win(wx.Panel):
 
 
         self.first_pass_counter = 0
+        self.fail_devices_serial_number=[]
 
         for i in range(len(self.all_dev_dict['overall_res'])):
             if self.all_dev_dict['tested_count'][i] == 1 and self.all_dev_dict['overall_res'][i] == 'Pass':
@@ -1510,32 +1567,36 @@ class Sync_win(wx.Panel):
             if self.all_dev_dict['tested_count'][i] == 1 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
             # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
             if self.all_dev_dict['tested_count'][i] == 2 and self.all_dev_dict['overall_res'][i] == 'Pass':
                 self.second_pass_counter += 1
             if self.all_dev_dict['tested_count'][i] == 2 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
             if self.all_dev_dict['tested_count'][i] == 3 and self.all_dev_dict['overall_res'][i] == 'Pass':
                 self.third_pass_counter += 1
             if self.all_dev_dict['tested_count'][i] == 3 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
-
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
             if self.all_dev_dict['tested_count'][i] == 4 and self.all_dev_dict['overall_res'][i] == "Pass":
                 self.fourth_pass_counter += 1
             if self.all_dev_dict['tested_count'][i] == 4 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
             if self.all_dev_dict['tested_count'][i] > 4 and self.all_dev_dict['overall_res'][i] == 'Pass':
                 self.other_pass_counter += 1
             if self.all_dev_dict['tested_count'][i] > 4 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_addr'][i])
 
 
         # print f_cnt
-
+        print self.fail_devices_serial_number,len(self.fail_devices_serial_number)
         self.fail_devices_counter = f_cnt
 
         self.total_unique_device_tested.SetLabel(str(len(self.all_dev_dict['dev_addr'])))
@@ -2121,6 +2182,10 @@ class AnalysisPanel(wx.Panel):
         wx.StaticText(self, -1, 'fuel gauge : ', (130, 480))
         self.fuel_gauge_fail_cycle = wx.StaticText(self, -1, '', (400, 480))
 
+        self.fail_sn_button =wx.Button(self, label="Fail", pos=(20, 240), size=(50, -1))
+        self.fail_sn_button.Enable(False)
+        self.Bind(wx.EVT_BUTTON, self.fail_sn_btn_click,self.fail_sn_button)
+        
         self.AnalysisSizer.Add(self.total_unique_device_tested, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.total_pass, 0, wx.ALL | wx.CENTER, 2)
         self.AnalysisSizer.Add(self.fail_devices, 0, wx.ALL | wx.CENTER, 2)
@@ -2131,6 +2196,30 @@ class AnalysisPanel(wx.Panel):
         # self.new_filepath='./new_data.csv'
         global fpath
         fpath = self.fpath
+
+    def fail_sn_btn_click(self,e):
+        '''display only fail device serial number in sheet.
+        global variable-- logpath_3
+        '''
+
+        if len(self.fail_devices_serial_number)>0:
+            self.logpath=self.fpath.split('.')[0]+"_Fail_Serial_Numbers"+".csv"#displays fail device serial numbers
+            f=open(self.logpath, 'wb')
+            rr=csv.writer(f)
+            rr.writerow(['SN'])
+            for i in range(len(self.fail_devices_serial_number)):
+                print type(self.fail_devices_serial_number[i])
+                rr.writerow([self.fail_devices_serial_number[i]])
+            f.close()
+            dlg = wx.MessageDialog(self, "Fail serial number file created.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+        else:
+            dlg = wx.MessageDialog(self, "No unit Failed.", 'Info', wx.OK | wx.ICON_INFORMATION)
+            dlg.ShowModal()
+            dlg.Destroy()
+
+
 
     def download_btn_click(self, evet):
 
@@ -2205,6 +2294,7 @@ class AnalysisPanel(wx.Panel):
         start_date = self.start_date_combo_box.GetValue()
         end_date = self.end_date_combo_box.GetValue()
         data_diff = self.data_combo_box.GetValue()
+        self.fail_sn_button.Enable(True)
 
         if is_greater(start_date, end_date):
             Info(self, "Please select valid start date and end date", "Invalid Selection", new=1)
@@ -2254,7 +2344,7 @@ class AnalysisPanel(wx.Panel):
 
         # print self.final_analysis
         self.all_dev_dict = {'dev_addr': [], 'tested_count': [], 'overall_res': [], 'ecg_fail': [], 'spo2_fail': [],
-                             'temp_fail': [], 'fuel_gauge_fail': []}
+                             'temp_fail': [], 'fuel_gauge_fail': [],'dev_sn':[]}
         self.dev_dict = {'dev_addr': []}
 
         self.ecg_fail_cycle_counter = 0
@@ -2282,6 +2372,8 @@ class AnalysisPanel(wx.Panel):
         self.fail_spo2_temp_key = 0
         self.fail_temper_temp_key = 0
         self.fail_fuel_gauge_temp_key = 0
+
+        
 
         for key in sorted(self.final_analysis.keys()):
             # print"key is :      " ,key
@@ -2462,6 +2554,8 @@ class AnalysisPanel(wx.Panel):
                     self.battery_0_counter += 1
             else:
                 self.all_dev_dict['dev_addr'].append(self.final_analysis[key]['mac'])
+                self.all_dev_dict['dev_sn'].append(self.final_analysis[key]['sn'])
+
                 self.all_dev_dict['tested_count'].append(1)
 
                 self.all_dev_dict['overall_res'].append(self.final_analysis[key]['overall_res'])
@@ -2503,7 +2597,7 @@ class AnalysisPanel(wx.Panel):
         self.failed_spo2_fail_count = 0
         self.failed_temp_fail_count = 0
         self.failed_fuelgauge_fail_count = 0
-
+        self.fail_devices_serial_number=[]
         self.first_pass_counter = 0
         for i in range(len(self.all_dev_dict['overall_res'])):
             if self.all_dev_dict['tested_count'][i] == 1 and self.all_dev_dict['overall_res'][i] == 'Pass':
@@ -2511,6 +2605,7 @@ class AnalysisPanel(wx.Panel):
             if self.all_dev_dict['tested_count'][i] == 1 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_sn'][i])
                 if self.all_dev_dict['ecg_fail'][i] == 'fail':
                     self.failed_ecg_fail_count += 1
                 if self.all_dev_dict['spo2_fail'][i] == 'fail':
@@ -2526,6 +2621,7 @@ class AnalysisPanel(wx.Panel):
             if self.all_dev_dict['tested_count'][i] == 2 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_sn'][i])
                 if self.all_dev_dict['ecg_fail'][i] == 'fail':
                     self.failed_ecg_fail_count += 1
                 if self.all_dev_dict['spo2_fail'][i] == 'fail':
@@ -2540,6 +2636,7 @@ class AnalysisPanel(wx.Panel):
             if self.all_dev_dict['tested_count'][i] == 3 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_sn'][i])
                 if self.all_dev_dict['ecg_fail'][i] == 'fail':
                     self.failed_ecg_fail_count += 1
                 if self.all_dev_dict['spo2_fail'][i] == 'fail':
@@ -2554,6 +2651,7 @@ class AnalysisPanel(wx.Panel):
             if self.all_dev_dict['tested_count'][i] == 4 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_sn'][i])
                 if self.all_dev_dict['ecg_fail'][i] == 'fail':
                     self.failed_ecg_fail_count += 1
                 if self.all_dev_dict['spo2_fail'][i] == 'fail':
@@ -2568,6 +2666,7 @@ class AnalysisPanel(wx.Panel):
             if self.all_dev_dict['tested_count'][i] > 4 and self.all_dev_dict['overall_res'][i] == 'Fail':
                 # print self.all_dev_dict['overall_res'][i]+'  :   '+str(self.all_dev_dict['tested_count'][i])
                 f_cnt += 1
+                self.fail_devices_serial_number.append(self.all_dev_dict['dev_sn'][i])
                 if self.all_dev_dict['ecg_fail'][i] == 'fail':
                     self.failed_ecg_fail_count += 1
                 if self.all_dev_dict['spo2_fail'][i] == 'fail':
@@ -2579,7 +2678,7 @@ class AnalysisPanel(wx.Panel):
 
 
         # print f_cnt
-
+        print self.fail_devices_serial_number,len(self.fail_devices_serial_number)
         self.fail_devices_counter = f_cnt
 
         self.ecg_fail_cycle.SetLabel(str(self.ecg_fail_cycle_counter))
